@@ -2,6 +2,7 @@ package com.dmm.task;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -18,14 +19,19 @@ public class TestController {
 	}
 
 	@RequestMapping("/main")
-	@PreAuthorize("hasRole('ROLE_USER')")
+	@PreAuthorize("hasRole('USER')")
 	public String main() {
 		return "main";
 	}
-
-	@RequestMapping("/login")
+	
+	@GetMapping("/login")
 	public String login() {
-		return "login";
+			return "login";
+		}
+	
+	@GetMapping("/loginForm")
+	public String loginForm() {
+			return "login";
+		}
 	}
 
-}
