@@ -1,4 +1,4 @@
-package com.dmm.task;
+package com.dmm.task.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -16,12 +16,6 @@ public class TestController {
 	@RequestMapping("/edit")
 	public String test() {
 		return "edit";
-	}
-
-	@RequestMapping("/main")
-	@PreAuthorize("hasRole('USER')")
-	public String main() {
-		return "main";
 	}
 	
 	@GetMapping("/login")
