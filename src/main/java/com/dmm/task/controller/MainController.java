@@ -9,7 +9,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.dmm.task.data.entity.Tasks;
 
 @Controller
 public class MainController {
@@ -42,14 +45,27 @@ public class MainController {
         	calendarDay = calendarDay.plusDays(1);
         	
             if (calendarDay.isAfter(firstDayOfMonth.plusDays(daysInMonth - 1)) && calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                month.add(new ArrayList<>(week)); // 最終週も追加
+            	week.add(calendarDay);
+            	month.add(new ArrayList<>(week)); // 最終週も追加
                 break;
             }
         
         }
-     model.addAttribute("week", week);
-     model.addAttribute("matrix", month);
-     return "main";
+        
+        System.out.println(week);
+        
+        // 日付とタスクを紐付けるコレクション（Lesson3 - Chapter22を参考に、エンティティ Tasksを用意ください）
+        MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
+
+        // コレクションのデータをHTMLに連携
+        model.addAttribute("tasks", tasks);
+
+        // カレンダーのデータをHTMLに連携
+        model.addAttribute("matrix", month);
+
+        // HTMLを表示
+        return "main";
+
     }
    
 }
