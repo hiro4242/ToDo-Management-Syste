@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -15,7 +17,7 @@ public class MainController {
     // カレンダー表示
     @GetMapping("/main")
 	@PreAuthorize("hasRole('USER')")
-	public String main() {
+	public String main(Model model) {
 		//	週と日を格納する二次元配列を用意する
 		List<List<LocalDate>> month = new ArrayList<>();
 		// 1週間分のLocalDateを格納するリストを用意する
@@ -45,9 +47,9 @@ public class MainController {
             }
         
         }
-     System.out.println("DEBUG");
-     System.out.println(month);	
-     return "main";	
+     model.addAttribute("week", week);
+     model.addAttribute("matrix", month);
+     return "main";
     }
    
 }
