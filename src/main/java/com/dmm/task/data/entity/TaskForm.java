@@ -1,11 +1,12 @@
 package com.dmm.task.data.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.Data;
 
 @Data
 public class TaskForm {
 	private String title;
-	private LocalDate date;
+	private LocalDateTime date;
 	private String text;
 }

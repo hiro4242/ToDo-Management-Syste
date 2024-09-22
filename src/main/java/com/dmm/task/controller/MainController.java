@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,10 +16,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.dmm.task.data.entity.TaskForm;
 import com.dmm.task.data.entity.Tasks;
+import com.dmm.task.data.repository.TasksRepository;
 import com.dmm.task.service.AccountUserDetails;
 
 @Controller
 public class MainController {
+	
+	@Autowired
+	private TasksRepository repo;
 	
 	@GetMapping("/login")
 	public String login() {
@@ -94,10 +98,13 @@ public class MainController {
     public String createPost(Model model, TaskForm form, @AuthenticationPrincipal AccountUserDetails user) {
         Tasks task = new Tasks();
         task.setName(user.getName());
-		task.setTitle(TaskForm.getTitle());
-		task.setText(TaskForm.getText());
+		task.setTitle(form.getTitle());
+		task.setText(form.getText());
+		task.setDate(form.getDate());
+		
+		repo.save(task);
 
-		return null;
+		return "redirect:/main";
     }
     
     
