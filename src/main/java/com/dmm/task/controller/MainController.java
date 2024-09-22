@@ -6,20 +6,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import com.dmm.task.data.entity.TaskForm;
 import com.dmm.task.data.entity.Tasks;
+import com.dmm.task.service.AccountUserDetails;
 
 @Controller
 public class MainController {
+	
+	@GetMapping("/login")
+	public String login() {
+			return "login";
+		}
+	
+	@GetMapping("/loginForm")
+	public String loginForm() {
+			return "login";
+		}
 
     // カレンダー表示
     @GetMapping("/main")
-	@PreAuthorize("hasRole('USER')")
+//	@PreAuthorize("hasRole('USER')")
 	public String main(Model model) {
 		//	週と日を格納する二次元配列を用意する
 		List<List<LocalDate>> month = new ArrayList<>();
@@ -52,8 +66,6 @@ public class MainController {
         
         }
         
-        System.out.println(week);
-        
         // 日付とタスクを紐付けるコレクション（Lesson3 - Chapter22を参考に、エンティティ Tasksを用意ください）
         MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
 
@@ -67,5 +79,28 @@ public class MainController {
         return "main";
 
     }
+    
+ // タスク登録画面の表示用
+    @GetMapping("/main/create/{date}")
+    public String create() {
+		return "create";
+      
+    }
+    
+
+
+    // タスク登録用
+    @PostMapping("/main/create")
+    public String createPost(Model model, TaskForm form, @AuthenticationPrincipal AccountUserDetails user) {
+        Tasks task = new Tasks();
+        task.setName(user.getName());
+		task.setTitle(TaskForm.getTitle());
+		task.setText(TaskForm.getText());
+
+		return null;
+    }
+    
+    
+    
    
 }
