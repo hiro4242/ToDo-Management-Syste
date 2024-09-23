@@ -12,12 +12,15 @@ import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.dmm.task.data.entity.TaskForm;
 import com.dmm.task.data.entity.Tasks;
 import com.dmm.task.data.repository.TasksRepository;
 import com.dmm.task.service.AccountUserDetails;
+
+import java.util.Optional;
 
 @Controller
 public class MainController {
@@ -37,7 +40,6 @@ public class MainController {
 
     // カレンダー表示
     @GetMapping("/main")
-//	@PreAuthorize("hasRole('USER')")
 	public String main(Model model, @AuthenticationPrincipal AccountUserDetails user) {
 		//	週と日を格納する二次元配列を用意する
 		List<List<LocalDate>> month = new ArrayList<>();
@@ -89,15 +91,12 @@ public class MainController {
         // ★取得したタスクをコレクションに追加
         for (Tasks task : list) {
             //tasksに taskを追加していく
-        	
-        	
-        	
+        	LocalDate taskDate = task.getDate().toLocalDate(); 
+        	tasks.add(taskDate, task);
         	
         	
         }
-        System.out.println(list);
-
-
+        
         // コレクションのデータをHTMLに連携
         model.addAttribute("tasks", tasks);
 
@@ -113,7 +112,7 @@ public class MainController {
     @GetMapping("/main/create/{date}")
     public String create() {
 		return "create";
-      
+        
     }
     
 
@@ -133,7 +132,20 @@ public class MainController {
     	return "redirect:/main";
     }
     
+    @GetMapping("/main/edit/{id}")
+    public String edit(@PathVariable("id") int id, Model model) {
+    	
+    	Optional<Tasks> optionalTask = repo.findById(id);
+    	if (optionalTask.isPresent()) {
+    	    Tasks task = optionalTask.get();
+    	    model.addAttribute("task", task);
+    	    
+    	    return "edit";
+    	    
+    	} else {
+    		
+    		return "redirect:/main"; 
+    	}		
     
-    
-   
+    }
 }
