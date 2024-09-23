@@ -38,7 +38,7 @@ public class MainController {
     // カレンダー表示
     @GetMapping("/main")
 //	@PreAuthorize("hasRole('USER')")
-	public String main(Model model) {
+	public String main(Model model, @AuthenticationPrincipal AccountUserDetails user) {
 		//	週と日を格納する二次元配列を用意する
 		List<List<LocalDate>> month = new ArrayList<>();
 		// 1週間分のLocalDateを格納するリストを用意する
@@ -48,8 +48,10 @@ public class MainController {
         LocalDate firstDayOfMonth = LocalDate.of(today.getYear(), today.getMonthValue(), 1);
 		//曜日を表すDayOfWeekを取得し、上で取得したLocalDateに曜日の値（DayOfWeek#getValue)をマイナスして前月分のLocalDateを求める
         LocalDate calendarDay = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7) ;
+        LocalDate firstDayOfCalendar = calendarDay;
         // 月末を求めるにはLocalDate#lengthOfMonth()を使う
         int daysInMonth = calendarDay.lengthOfMonth();
+        LocalDate lastDayOfCalendar;
         
         // 1日ずつ増やしてLocalDateを求めていき、2．で作成したListへ格納していき、1週間分詰めたら1．のリストへ格納する
         while(true) {
@@ -63,8 +65,10 @@ public class MainController {
         	calendarDay = calendarDay.plusDays(1);
         	
             if (calendarDay.isAfter(firstDayOfMonth.plusDays(daysInMonth - 1)) && calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            	lastDayOfCalendar = calendarDay;
             	week.add(calendarDay);
             	month.add(new ArrayList<>(week)); // 最終週も追加
+            	week.clear();
                 break;
             }
         
@@ -72,6 +76,27 @@ public class MainController {
         
         // 日付とタスクを紐付けるコレクション（Lesson3 - Chapter22を参考に、エンティティ Tasksを用意ください）
         MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
+        
+        
+        // ★タスクを取得
+        List<Tasks> list;
+        if (user.getUsername() == "admin") {  // 管理者だったら
+            list = repo.findByDateBetweenByAdmin(firstDayOfCalendar.atTime(0, 0) , lastDayOfCalendar.atTime(0, 0));
+        } else {  // ユーザーだったら
+            list = repo.findByDateBetween(firstDayOfCalendar.atTime(0, 0) , lastDayOfCalendar.atTime(0, 0), user.getUsername());
+        }
+
+        // ★取得したタスクをコレクションに追加
+        for (Tasks task : list) {
+            //tasksに taskを追加していく
+        	
+        	
+        	
+        	
+        	
+        }
+        System.out.println(list);
+
 
         // コレクションのデータをHTMLに連携
         model.addAttribute("tasks", tasks);
@@ -95,16 +120,17 @@ public class MainController {
 
     // タスク登録用
     @PostMapping("/main/create")
-    public String createPost(Model model, TaskForm form, @AuthenticationPrincipal AccountUserDetails user) {
+    public String createPost(TaskForm form, @AuthenticationPrincipal AccountUserDetails user) {
         Tasks task = new Tasks();
-        task.setName(user.getName());
-		task.setTitle(form.getTitle());
-		task.setText(form.getText());
-		task.setDate(form.getDate());
-		
-		repo.save(task);
+        task.setName(user.getUsername());
+    	task.setTitle(form.getTitle());
+    	task.setText(form.getText());
+    	task.setDate(form.getDate().atTime(0, 0));  // ★キャストする（データベースは LocalDateTime型のため）
+    	task.setDone(false);  // ★タスク登録時は完了していないので、初期値として falseを設定
+    	
+        repo.save(task);
 
-		return "redirect:/main";
+    	return "redirect:/main";
     }
     
     
