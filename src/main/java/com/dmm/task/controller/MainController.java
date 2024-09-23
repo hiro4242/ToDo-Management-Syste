@@ -92,9 +92,7 @@ public class MainController {
         for (Tasks task : list) {
             //tasksに taskを追加していく
         	LocalDate taskDate = task.getDate().toLocalDate(); 
-        	tasks.add(taskDate, task);
-        	
-        	
+        	tasks.add(taskDate, task); 	
         }
         
         // コレクションのデータをHTMLに連携
@@ -145,7 +143,22 @@ public class MainController {
     	} else {
     		
     		return "redirect:/main"; 
-    	}		
-    
+    	}
     }
+    
+    @PostMapping("/main/edit/{id}")
+    public String editPost(TaskForm form, @PathVariable("id") int id, @AuthenticationPrincipal AccountUserDetails user) {
+    	Optional<Tasks> optionalTask = repo.findById(id);
+    	Tasks task = optionalTask.get();
+        task.setName(user.getUsername());
+        task.setTitle(form.getTitle());
+        task.setText(form.getText());
+        task.setDate(form.getDate().atTime(0, 0));
+        task.setDone(form.isDone());
+
+    	repo.save(task);
+      	
+      return "/main";
+    }
+    
 }
