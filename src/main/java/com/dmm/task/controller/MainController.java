@@ -109,11 +109,11 @@ public class MainController {
  // タスク登録画面の表示用
     @GetMapping("/main/create/{date}")
     public String create() {
+//    	model.addAttribute("date", date);
 		return "create";
         
     }
     
-
 
     // タスク登録用
     @PostMapping("/main/create")
@@ -147,10 +147,10 @@ public class MainController {
     }
     
     @PostMapping("/main/edit/{id}")
-    public String editPost(TaskForm form, @PathVariable("id") int id, @AuthenticationPrincipal AccountUserDetails user) {
-    	Optional<Tasks> optionalTask = repo.findById(id);
-    	Tasks task = optionalTask.get();
-        task.setName(user.getUsername());
+    public String editTask(TaskForm form, @PathVariable("id") int id, @AuthenticationPrincipal AccountUserDetails user) {
+    	Tasks task = new Tasks();
+    	task.setId(id);
+    	task.setName(user.getUsername());
         task.setTitle(form.getTitle());
         task.setText(form.getText());
         task.setDate(form.getDate().atTime(0, 0));
@@ -158,7 +158,19 @@ public class MainController {
 
     	repo.save(task);
       	
-      return "/main";
+      return "redirect:/main";
     }
+    
+    @PostMapping("/main/delete/{id}")
+    public String deleteTask(@PathVariable("id") int id) {
+    	Tasks task = new Tasks();
+    	task.setId(id);
+    	
+    	repo.delete(task);
+    	
+    	return "redirect:/main";
+    	
+    }
+    
     
 }
