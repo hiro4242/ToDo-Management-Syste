@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,7 +41,7 @@ public class MainController {
 
     // カレンダー表示
     @GetMapping("/main")
-	public String main(Model model, @AuthenticationPrincipal AccountUserDetails user) {
+	public String main(Model model, @AuthenticationPrincipal AccountUserDetails user, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
 		//	週と日を格納する二次元配列を用意する
 		List<List<LocalDate>> month = new ArrayList<>();
 		// 1週間分のLocalDateを格納するリストを用意する
@@ -55,26 +56,54 @@ public class MainController {
         int daysInMonth = calendarDay.lengthOfMonth();
         LocalDate lastDayOfCalendar;
         
-        // 1日ずつ増やしてLocalDateを求めていき、2．で作成したListへ格納していき、1週間分詰めたら1．のリストへ格納する
-        while(true) {
-        	week.add(calendarDay);
-        	
-        	if (calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
-        		month.add(new ArrayList<>(week));
-        		week.clear();
+        if (date == null) {
+        	// 1日ずつ増やしてLocalDateを求めていき、2．で作成したListへ格納していき、1週間分詰めたら1．のリストへ格納する
+        	while(true) {
+        		week.add(calendarDay);
+
+        		if (calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
+        			month.add(new ArrayList<>(week));
+        			week.clear();
+        		}
+
+        		calendarDay = calendarDay.plusDays(1);
+
+        		if (calendarDay.isAfter(firstDayOfMonth.plusDays(daysInMonth - 1)) && calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
+        			lastDayOfCalendar = calendarDay;
+        			week.add(calendarDay);
+        			month.add(new ArrayList<>(week)); // 最終週も追加
+        			week.clear();
+        			break;
+        		}
         	}
-        	
-        	calendarDay = calendarDay.plusDays(1);
-        	
-            if (calendarDay.isAfter(firstDayOfMonth.plusDays(daysInMonth - 1)) && calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            	lastDayOfCalendar = calendarDay;
-            	week.add(calendarDay);
-            	month.add(new ArrayList<>(week)); // 最終週も追加
-            	week.clear();
-                break;
-            }
-        
         }
+        else {
+        	firstDayOfMonth = date;
+    		//曜日を表すDayOfWeekを取得し、上で取得したLocalDateに曜日の値（DayOfWeek#getValue)をマイナスして前月分のLocalDateを求める
+            calendarDay = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7) ;
+            firstDayOfCalendar = calendarDay;
+        	
+        	// 1日ずつ増やしてLocalDateを求めていき、2．で作成したListへ格納していき、1週間分詰めたら1．のリストへ格納する
+        	while(true) {
+        		week.add(calendarDay);
+
+        		if (calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
+        			month.add(new ArrayList<>(week));
+        			week.clear();
+        		}
+
+        		calendarDay = calendarDay.plusDays(1);
+
+        		if (calendarDay.isAfter(firstDayOfMonth.plusDays(daysInMonth - 1)) && calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
+        			lastDayOfCalendar = calendarDay;
+        			week.add(calendarDay);
+        			month.add(new ArrayList<>(week)); // 最終週も追加
+        			week.clear();
+        			break;
+        		}
+        	}
+        }
+        
         
         // 日付とタスクを紐付けるコレクション（Lesson3 - Chapter22を参考に、エンティティ Tasksを用意ください）
         MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
@@ -100,6 +129,12 @@ public class MainController {
 
         // カレンダーのデータをHTMLに連携
         model.addAttribute("matrix", month);
+        
+        // 前月
+        model.addAttribute("prev", firstDayOfMonth.minusMonths(1));
+
+        // 翌月
+        model.addAttribute("next", firstDayOfMonth.plusMonths(1));
 
         // HTMLを表示
         return "main";
