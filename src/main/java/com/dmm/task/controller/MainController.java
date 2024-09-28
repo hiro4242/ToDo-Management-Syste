@@ -2,6 +2,7 @@ package com.dmm.task.controller;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,9 @@ public class MainController {
         if (date == null) {
         	// 1日ずつ増やしてLocalDateを求めていき、2．で作成したListへ格納していき、1週間分詰めたら1．のリストへ格納する
         	while(true) {
+        		date = firstDayOfMonth;
+        		date = LocalDate.of(date.getYear(), date.getMonthValue(), 1);  // 現在日時からその月の1日を取得
+        		
         		week.add(calendarDay);
 
         		if (calendarDay.getDayOfWeek() == DayOfWeek.SATURDAY) {
@@ -135,6 +139,8 @@ public class MainController {
 
         // 翌月
         model.addAttribute("next", firstDayOfMonth.plusMonths(1));
+        
+        model.addAttribute("month", date.format(DateTimeFormatter.ofPattern("yyyy年MM月")));
 
         // HTMLを表示
         return "main";
@@ -143,8 +149,8 @@ public class MainController {
     
  // タスク登録画面の表示用
     @GetMapping("/main/create/{date}")
-    public String create() {
-//    	model.addAttribute("date", date);
+    public String create(Model model, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date)  {
+    	model.addAttribute("date", date);
 		return "create";
         
     }
