@@ -115,7 +115,7 @@ public class MainController {
         
         // ★タスクを取得
         List<Tasks> list;
-        if (user.getUsername() == "admin") {  // 管理者だったら
+        if (user.getUsername().equals("admin")) {  // 管理者だったら
             list = repo.findByDateBetweenByAdmin(firstDayOfCalendar.atTime(0, 0) , lastDayOfCalendar.atTime(0, 0));
         } else {  // ユーザーだったら
             list = repo.findByDateBetween(firstDayOfCalendar.atTime(0, 0) , lastDayOfCalendar.atTime(0, 0), user.getUsername());
